@@ -1,0 +1,67 @@
+var pt='c:/temp1/testnode.txt';
+var pt='c:/temp1/t900.txt';
+
+const express = require('express');
+const index = express();
+const path = require('path');
+let fs = require( 'fs' );
+//const { once}  = require('events');
+const readline = require( 'readline' );
+
+reader = fs.createReadStream( pt );
+var  str ='' ;
+var lineF='' ;
+var strF='' ;
+var q=0;
+let nn=0;
+var mm=0
+/*
+reader.on( 'data' , function (chunk) {
+    str=chunk.toString();
+    console.log(chunk.toString());
+    console.log(str.length);
+});
+*/
+console.log('----------------------------');
+console.log('start :',  new Date());
+console.log('----------------------------');
+const file = readline.createInterface({
+    input: fs.createReadStream( pt ),
+    output: process.stdout,
+    terminal: false
+});
+file.on( 'line' , (line) => {
+     ++nn;
+     var q1=(line.match(/B/g) || []).length;
+     lineF=line+"\n\r"+ ` < строка номер: ${nn} ,  символов B: ${q1} , длина строки ${line.length}    >`;
+     str=str+line;
+     var q2=(str.match(/B/g) || []).length;
+     if (str.length > 2000) {str=''}
+     strF=str + "\n\r"+ ` < строк : ${nn} ,  символов B: ${q2} , длина строки ${str.length}    >`;
+     q+=q1 ;
+//   console.log(line ,  q1 , q) ;
+   // console.log('>>', q) ;
+   // console.log('str=', str ,q) ;
+
+})
+
+file.on('close', function () {
+    console.log("Done" , new Date() , `  строк: ${nn} ` , `  символов B: ${q} `);
+});
+reader.on('end', () => console.log('There will be no more data.'));
+
+//setTimeout(()=>console.log('\n\r',str,q),2000)
+index.get('/', (req, res) => res.send('Home Page Route'));
+index.get('/str', (req, res) => res.send(strF));
+index.get('/linef', (req, res) => res.send(lineF));
+
+const port = process.env.PORT || 3006   ;
+index.listen(port, () => console.log(`Server running on ${port}, port ${port}  ${new Date()}`));
+
+
+function rp(){return new Promise((resolve, reject) => setTimeout(()=>resolve(nn), 8000))}
+rp().then(val=>console.log(new Date() , 'nn=', val));
+rp().then(val=>console.log(new Date() , 'nn=', val));
+
+let rp1=()=> new Promise(resolve => setTimeout(() => resolve(nn), 1000));
+(async function f1() {while (nn <7386666) await rp1().then(val=>console.log( '>>>', `строк: ${val} ,  символов :${q}, ${new Date()}`         ))})();
